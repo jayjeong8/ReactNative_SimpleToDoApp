@@ -4,11 +4,24 @@ import {Fontisto} from "@expo/vector-icons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useEffect, useState} from 'react';
 import {theme} from './theme';
+import List from "./components/List";
 
 const STORAGE_KEY = "@toDos";
 //TODO: 1 work나 travel 중 마지막에 열린 상태 기억하기
 //TODO: 2 완료 기능 추가하기
 //TODO: 3 유저가 텍스트 수정하게 하기
+
+const DATA = {
+  1:{message: 'Message #1'},
+    2:{message: 'Message #2'},
+    3:{message: 'Message #3'},
+    4:{message: 'Message #4'},
+    5:{message: 'Message #5'},
+    6:{message: 'Message #6'},
+    7:{message: 'Message #7'},
+    8:{message: 'Message #8'},
+};
+
 
 export default function App() {
     const [workState, setWorkState] = useState(true);
@@ -77,7 +90,7 @@ export default function App() {
                 placeholder={workState ? "What do you have to do?" : "Where do you want to go?"}
                 style={styles.input}>
             </TextInput>
-            <ScrollView>
+            {/*<ScrollView>
                 {
                     Object.keys(toDos).map((key) =>
                         toDos[key].workState === workState ? (
@@ -90,7 +103,8 @@ export default function App() {
                         ) : null
                     )
                 }
-            </ScrollView>
+            </ScrollView>*/}
+            <List data={DATA} />
         </View>
     );
 }
@@ -99,12 +113,12 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: theme.black,
-        paddingHorizontal: theme.gapM,
+        // paddingHorizontal: theme.gapM,
     },
     header: {
-        // justifyContent: "space-between",
         flexDirection: "row",
         marginTop: 100,
+        marginHorizontal: theme.gapM,
     },
     btnText: {
         marginRight: theme.gapM,
@@ -113,6 +127,7 @@ const styles = StyleSheet.create({
     },
     input: {
         backgroundColor: theme.white,
+        marginHorizontal: theme.gapM,
         paddingVertical: theme.gapS,
         paddingHorizontal: theme.gapM,
         borderRadius: 4,
