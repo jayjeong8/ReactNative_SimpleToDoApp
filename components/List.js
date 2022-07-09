@@ -1,40 +1,51 @@
-import {StyleSheet, ScrollView, LayoutAnimation, Platform, UIManager, View} from "react-native";
+import {StyleSheet, ScrollView, LayoutAnimation, Platform, UIManager, View, Alert} from "react-native";
 import Item from "./Item";
 import {useEffect, useState} from "react";
+import {useRecoilState, useRecoilValue} from "recoil";
+import {FilteredTodoListState, TodoListState} from "../atom";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export default function List({data, swiping}) {
-  const [dataState, setData] = useState({});
+export default function List({data}) {
+  const [todoList, setTodoList] = useRecoilState(TodoListState);
   const [swipingState, setSwiping] = useState(false);
 
   useEffect(() => {
-    setData(data);
-  }, []);
-
-  useEffect(() => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
-  }, [dataState]);
+  }, [todoList]);
 
-  const cleanFromScreen = (key) => {
-    const tempData = {...dataState};
-    delete tempData[key];
-    setData(tempData);
+  const DoneTodo = (key) => { //더 효율적인 방법 고민해보기
+    const tempTodos = {...todoList};
+    tempTodos[key].category = !tempTodos[key].category;
+    setTodoList(tempTodos);
   }
 
+  const deleteTodo = (key) => {
+    Alert.alert("Delete To Do", "Are you sure?", [
+      {text: "Cancel"},
+      {
+        text: "I'm Sure",
+        onPress: () => {
+          const tempTodos = {...todoList};
+          delete tempTodos[key];
+          setTodoList(tempTodos);
+        }
+      }
+    ]);
+  };
+
   const renderItems = () => {
-    return Object.keys(dataState).map(key => {
+    return data.map(key => {
       return (
         <Item
           key={key}
           swipingCheck={(swiping) => setSwiping(swiping)}
-          message={dataState[key].message}
+          message={todoList[key].message}
           id={key}
-          cleanFromScreen={key => cleanFromScreen(key)}
-          leftButtonPressed={() => console.log('left')}
-          deleteButtonPressed={() => console.log('delete')}
+          leftButtonPressed={() => DoneTodo(key)}
+          deleteButtonPressed={() => deleteTodo(key)}
           editButtonPressed={() => console.log('edit')}
         />
       );
