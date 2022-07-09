@@ -5,5 +5,5 @@ export const theme = {
     white: "white",
     gapS: 12,
     gapM: 20,
-
+    gapL: 36,
 };
