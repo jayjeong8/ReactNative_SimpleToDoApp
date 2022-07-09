@@ -102,7 +102,7 @@ export default function Item({
     Animated.timing(position, {
       toValue: {x, y: 0},
       duration: FORCING_DURATION
-    }).start(() => cleanFromScreen(id));
+    }).start();
     callback();
   }
 
