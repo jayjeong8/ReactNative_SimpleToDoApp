@@ -177,7 +177,7 @@ export default function Item({
       <Animated.View // Right Button  1
         style={[styles.rightButtonContainer, {left: SCREEN_WIDTH / 1.7}, getRightButtonProps()]}
       >
-        <TouchableOpacity onPress={() => completeSwipe('left', () => deleteButtonPressed())}>
+        <TouchableOpacity onPress={() => deleteButtonPressed()}>
           <AntDesign name="delete" size={20}/>
           <Text style={styles.textStyle}>Delete</Text>
         </TouchableOpacity>
