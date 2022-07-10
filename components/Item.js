@@ -2,6 +2,8 @@ import {View, Text, Dimensions, Animated, PanResponder, TouchableOpacity, Easing
 import {AntDesign} from "@expo/vector-icons";
 import {useState, useRef} from "react";
 import {theme} from "../theme";
+import {useRecoilValue} from "recoil";
+import {TodoListFilterState} from "../atom";
 
 
 //유저가 스와이프를 확실히 원하는지에 대한 한계값 설정.
