@@ -19,7 +19,7 @@ export default function List() {
 
   const DoneTodo = (key) => { //더 효율적인 방법 고민해보기
     const tempTodos = {...todoList};
-    tempTodos[key].category = !tempTodos[key].category;
+    tempTodos[key] = {message: tempTodos[key].message, category: !tempTodos[key].category};
     setTodoList(tempTodos);
   }
 
