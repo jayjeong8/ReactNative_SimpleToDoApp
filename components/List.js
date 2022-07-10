@@ -45,7 +45,7 @@ export default function List() {
           swipingCheck={(swiping) => setSwiping(swiping)}
           message={todoList[key].message}
           id={key}
-          leftButtonPressed={() => DoneTodo(key)}
+          checkedButtonPressed={() => DoneTodo(key)}
           deleteButtonPressed={() => deleteTodo(key)}
           editButtonPressed={() => console.log('edit')}
         />

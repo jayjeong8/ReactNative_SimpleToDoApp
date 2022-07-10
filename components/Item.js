@@ -8,21 +8,21 @@ import {theme} from "../theme";
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCROLL_THRESHOLD = SCREEN_WIDTH / 15;
 const FORCE_TO_OPEN_THRESHOLD = SCREEN_WIDTH / 3.5;
-const LEFT_BUTTONS_THRESHOLD = SCREEN_WIDTH / 6;
+const LEFT_BUTTONS_THRESHOLD = SCREEN_WIDTH / 7;
 const FORCING_DURATION = 350;
 
 export default function Item({
                                swipingCheck,
                                message,
                                id,
-                               cleanFromScreen,
-                               leftButtonPressed,
+                               checkedButtonPressed,
                                deleteButtonPressed,
                                editButtonPressed
                              }) {
   //Animated API로 이동시킬 구성요소의 초기 위치를 정의한다.
   const position = useRef(new Animated.ValueXY(0, 0)).current;
   const [scrollStopped, setScrollStopped] = useState(false);
+  const categoryState = useRecoilValue(TodoListFilterState);
 
   //PanResponder : 여러 터치를 단일 제스처로 조정. 멀티터치 제스처를 인식할 수 있음.
   //포착된 제스처를 기반으로 Animated API를 작동시킬 수 있음
@@ -80,7 +80,7 @@ export default function Item({
 
   const userSwipedRight = (gesture) => {
     if (gesture.dx >= FORCE_TO_OPEN_THRESHOLD) {
-      completeSwipe('right', leftButtonPressed);
+      completeSwipe('right', checkedButtonPressed);
     } else if (gesture.dx >= LEFT_BUTTONS_THRESHOLD && gesture.dx < FORCE_TO_OPEN_THRESHOLD) {
       showButton('right');
     } else {
@@ -150,11 +150,21 @@ export default function Item({
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.leftButtonContainer, getLeftButtonProps()]}>
-        <TouchableOpacity onPress={() => completeSwipe('right', () => leftButtonPressed())}>
-          <AntDesign name="check" size={20} color={"black"}/>
-          <Text style={styles.textStyle} numberOfLines={1} ellipsizeMode={'clip'}>Open</Text>
-        </TouchableOpacity>
+      <Animated.View
+        style={[styles.leftButtonContainer, {backgroundColor: categoryState ? theme.positive : theme.neutral}, getLeftButtonProps()]}>
+        {
+          categoryState ? (
+            <TouchableOpacity onPress={() => completeSwipe('right', () => checkedButtonPressed())}>
+              <AntDesign name="check" size={20} color={"black"}/>
+              <Text style={styles.textStyle} numberOfLines={1} ellipsizeMode={'clip'}>Done</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity onPress={() => completeSwipe('right', () => checkedButtonPressed())}>
+              <AntDesign name="reload1" size={20} color={"black"}/>
+              <Text style={styles.textStyle} numberOfLines={1} ellipsizeMode={'clip'}>Add ToDo</Text>
+            </TouchableOpacity>
+          )
+        }
       </Animated.View>
 
       {/*position.getLayout()에서 포지션을 가져온다.*/}
@@ -172,7 +182,7 @@ export default function Item({
       </Animated.View>
 
       <Animated.View // Right Button 2
-        style={[styles.rightButtonContainer, {backgroundColor: '#FFC400'}, getRightButtonProps()]}
+        style={[styles.rightButtonContainer, {backgroundColor: theme.neutral}, getRightButtonProps()]}
       >
         <TouchableOpacity onPress={() => editButtonPressed()}>
           <AntDesign name="edit" size={20}/>
@@ -215,7 +225,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 23,
     elevation: 3,
-    backgroundColor: '#D50000',
+    backgroundColor: theme.negative,
     zIndex: 1
   },
   leftButtonContainer: {
@@ -226,7 +236,6 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     paddingHorizontal: 18,
     paddingVertical: 23,
-    backgroundColor: '#50f442',
     elevation: 3,
   }
 });
