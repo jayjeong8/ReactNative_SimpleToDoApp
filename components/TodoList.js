@@ -51,7 +51,7 @@ export default function TodoList() {
             </TextInput>
           )
         }
-        <List data={filteredTodoList}/>
+        <List />
       </View>
   );
 }

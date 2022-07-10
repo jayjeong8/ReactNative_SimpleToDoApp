@@ -8,7 +8,8 @@ if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export default function List({data}) {
+export default function List() {
+  const filteredTodoList = useRecoilValue(FilteredTodoListState);
   const [todoList, setTodoList] = useRecoilState(TodoListState);
   const [swipingState, setSwiping] = useState(false);
 
@@ -37,7 +38,7 @@ export default function List({data}) {
   };
 
   const renderItems = () => {
-    return data.map(key => {
+    return filteredTodoList.map(key => {
       return (
         <Item
           key={key}
