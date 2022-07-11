@@ -13,14 +13,11 @@ export default function List() {
   const [todoList, setTodoList] = useRecoilState(TodoListState);
   const [swipingState, setSwiping] = useState(false);
 
-  useEffect(() => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
-  }, [todoList]);
-
   const DoneTodo = (key) => { //더 효율적인 방법 고민해보기
     const tempTodos = {...todoList};
     tempTodos[key] = {message: tempTodos[key].message, category: !tempTodos[key].category};
     setTodoList(tempTodos);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
   }
 
   const deleteTodo = (key) => {
@@ -32,6 +29,7 @@ export default function List() {
           const tempTodos = {...todoList};
           delete tempTodos[key];
           setTodoList(tempTodos);
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
         }
       }
     ]);
