@@ -30,46 +30,47 @@ export default function Item({
   //포착된 제스처를 기반으로 Animated API를 작동시킬 수 있음
   const panResponder = useRef(
     PanResponder.create({
-    onStartShouldSetPanResponder: () => false, //단일 터치에는 반응하지 않는다.
-    onMoveShouldSetPanResponder: () => true,//스와이프같은 연속적인 움직임에는 반응한다.
-    onPanResponderTerminationRequest: () => false, //애니메이션이 진행중인 경우 애니메이션이 우선순위 이므로 다른 구성요소에는 반응하지 않는다.
+      onStartShouldSetPanResponder: () => false, //단일 터치에는 반응하지 않는다.
+      onMoveShouldSetPanResponder: () => true,//스와이프같은 연속적인 움직임에는 반응한다.
+      onPanResponderTerminationRequest: () => false, //애니메이션이 진행중인 경우 애니메이션이 우선순위 이므로 다른 구성요소에는 반응하지 않는다.
 
-    onPanResponderGrant: () => { //panResponder가 응답을 시작한다. (승인)
-      //승인 전까지 이동된 값을 offset으로 설정하고, 새 제스처를 위해 초기화된 값을 넣어준다.
-      position.setOffset({x: position.x._value, y: 0});
-      position.setValue({x: 0, y: 0});
-    },
+      onPanResponderGrant: () => { //panResponder가 응답을 시작한다. (승인)
+        //승인 전까지 이동된 값을 offset으로 설정하고, 새 제스처를 위해 초기화된 값을 넣어준다.
+        position.setOffset({x: position.x._value, y: 0});
+        position.setValue({x: 0, y: 0});
+      },
 
-    onPanResponderMove: (event, gesture) => { //유저가 손가락을 계속 움직일 경우
-      // 부드러운 움직임을 위해 손가락의 위치를 x값에 계속해서 반영해준다.
-      if (gesture.dx >= SCROLL_THRESHOLD) {
-        enableScrollView(true);
-        const x = gesture.dx - SCROLL_THRESHOLD;
-        position.setValue({x, y: 0});
-      } else if (gesture.dx <= -SCROLL_THRESHOLD) {
-        enableScrollView(true);
-        const x = gesture.dx + SCROLL_THRESHOLD;
-        position.setValue({x, y: 0});
+      onPanResponderMove: (event, gesture) => { //유저가 손가락을 계속 움직일 경우
+        // 부드러운 움직임을 위해 손가락의 위치를 x값에 계속해서 반영해준다.
+        if (gesture.dx >= SCROLL_THRESHOLD) {
+          enableScrollView(true);
+          const x = gesture.dx - SCROLL_THRESHOLD;
+          position.setValue({x, y: 0});
+        } else if (gesture.dx <= -SCROLL_THRESHOLD) {
+          enableScrollView(true);
+          const x = gesture.dx + SCROLL_THRESHOLD;
+          position.setValue({x, y: 0});
+        }
+      },
+
+      onPanResponderRelease: (event, gesture) => { //유저가 터치를 중지할 경우
+        position.flattenOffset();//오프셋에 있는 값을 애니메이션 값에 추가하고 오프셋 값은 초기화시킨다.
+        if (gesture.dx > 0) {
+          userSwipedRight(gesture);
+        } else if (gesture.dx < 0) {
+          userSwipedLeft(gesture);
+        } else {
+          resetPosition();
+        }
+      },
+
+      onPanResponderTerminate: () => {
+        Animated.spring(position, {
+          toValue: {x: 0, y: 0},
+          useNativeDriver:false,
+        }).start();
       }
-    },
-
-    onPanResponderRelease: (event, gesture) => { //유저가 터치를 중지할 경우
-      position.flattenOffset();//오프셋에 있는 값을 애니메이션 값에 추가하고 오프셋 값은 초기화시킨다.
-      if (gesture.dx > 0) {
-        userSwipedRight(gesture);
-      } else if (gesture.dx < 0) {
-        userSwipedLeft(gesture);
-      } else {
-        resetPosition();
-      }
-    },
-
-    onPanResponderTerminate: () => {
-      Animated.spring(position, {
-        toValue: {x: 0, y: 0}
-      }).start();
-    }
-  })
+    })
   ).current;
 
 
@@ -91,8 +92,7 @@ export default function Item({
   }
 
   const userSwipedLeft = (gesture) => {
-    console.log(gesture.dx);
-  if (gesture.dx <= - LEFT_BUTTONS_THRESHOLD) {
+    if (gesture.dx <= -LEFT_BUTTONS_THRESHOLD) {
       showButton('left');
     } else {
       resetPosition();
@@ -103,7 +103,8 @@ export default function Item({
     const x = dimension === 'right' ? SCREEN_WIDTH : -SCREEN_WIDTH;
     Animated.timing(position, {
       toValue: {x, y: 0},
-      duration: FORCING_DURATION
+      duration: FORCING_DURATION,
+      useNativeDriver:false,
     }).start();
     callback();
   }
@@ -111,7 +112,8 @@ export default function Item({
   const resetPosition = () => {
     Animated.timing(position, {
       toValue: {x: 0, y: 0},
-      duration: 200
+      duration: 200,
+      useNativeDriver:false,
     }).start();
   }
 
@@ -120,7 +122,8 @@ export default function Item({
     Animated.timing(position, {
       toValue: {x, y: 0},
       duration: 400,
-      easing: Easing.out(Easing.quad)
+      easing: Easing.out(Easing.quad),
+      useNativeDriver:false,
     }).start(() => enableScrollView(false));
   }
 
