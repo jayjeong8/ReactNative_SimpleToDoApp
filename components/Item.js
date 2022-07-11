@@ -1,9 +1,19 @@
-import {View, Text, Dimensions, Animated, PanResponder, TouchableOpacity, Easing, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  Dimensions,
+  Animated,
+  PanResponder,
+  TouchableOpacity,
+  Easing,
+  StyleSheet,
+  TextInput
+} from 'react-native';
 import {AntDesign} from "@expo/vector-icons";
 import {useState, useRef} from "react";
 import {theme} from "../theme";
-import {useRecoilValue} from "recoil";
-import {TodoListFilterState} from "../atom";
+import {useRecoilState, useRecoilValue} from "recoil";
+import {storeData, TodoListFilterState, TodoListState} from "../atom";
 
 
 //유저가 스와이프를 확실히 원하는지에 대한 한계값 설정.
@@ -11,7 +21,7 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCROLL_THRESHOLD = SCREEN_WIDTH / 15;
 const FORCE_TO_OPEN_THRESHOLD = SCREEN_WIDTH / 3.5;
 const LEFT_BUTTONS_THRESHOLD = SCREEN_WIDTH / 7;
-const FORCING_DURATION = 350;
+const FORCING_DURATION = 450;
 
 export default function Item({
                                swipingCheck,
@@ -19,12 +29,15 @@ export default function Item({
                                id,
                                checkedButtonPressed,
                                deleteButtonPressed,
-                               editButtonPressed
+                               // editButtonPressed
                              }) {
   //Animated API로 이동시킬 구성요소의 초기 위치를 정의한다.
   const position = useRef(new Animated.ValueXY(0, 0)).current;
   const [scrollStopped, setScrollStopped] = useState(false);
+  const [editState, setEditState] = useState(false);
+  const [text, setText] = useState(message);
   const categoryState = useRecoilValue(TodoListFilterState);
+  const [todoList, setTodoList] = useRecoilState(TodoListState);
 
   //PanResponder : 여러 터치를 단일 제스처로 조정. 멀티터치 제스처를 인식할 수 있음.
   //포착된 제스처를 기반으로 Animated API를 작동시킬 수 있음
@@ -67,7 +80,7 @@ export default function Item({
       onPanResponderTerminate: () => {
         Animated.spring(position, {
           toValue: {x: 0, y: 0},
-          useNativeDriver:false,
+          useNativeDriver: false,
         }).start();
       }
     })
@@ -104,7 +117,7 @@ export default function Item({
     Animated.timing(position, {
       toValue: {x, y: 0},
       duration: FORCING_DURATION,
-      useNativeDriver:false,
+      useNativeDriver: false,
     }).start();
     callback();
   }
@@ -113,7 +126,7 @@ export default function Item({
     Animated.timing(position, {
       toValue: {x: 0, y: 0},
       duration: 200,
-      useNativeDriver:false,
+      useNativeDriver: false,
     }).start();
   }
 
@@ -123,7 +136,7 @@ export default function Item({
       toValue: {x, y: 0},
       duration: 400,
       easing: Easing.out(Easing.quad),
-      useNativeDriver:false,
+      useNativeDriver: false,
     }).start(() => enableScrollView(false));
   }
 
@@ -152,6 +165,21 @@ export default function Item({
     };
   }
 
+  const editTodo = () => {
+    resetPosition();
+    setEditState(true);
+  }
+
+  const submitEditTodo = (id) => {
+    setEditState(false);
+    const tempTodos = {...todoList};
+    tempTodos[id] = {message: text, category: tempTodos[id].category};
+    setTodoList(tempTodos);
+    storeData(tempTodos);
+    setText("");
+  }
+
+  //TODO: 객체 복사 오류 수정하기 (edit 후 & 완료 후 목록 다시 나타나거나 카테고리 이동하면 내용초기화되는 오류)
 
   return (
     <View style={styles.container}>
@@ -174,7 +202,22 @@ export default function Item({
 
       {/*position.getLayout()에서 포지션을 가져온다.*/}
       <Animated.View style={[styles.textContainer, position.getLayout()]} {...panResponder.panHandlers} >
-        <Text style={styles.textStyle}>{message}</Text>
+        {editState ? (
+          <TextInput
+            value={text}
+            onSubmitEditing={() => submitEditTodo(id)}
+            onChangeText={(payload) => setText(payload)}
+            returnKeyType={"done"}
+            placeholder={message}
+            placeholderTextColor={theme.lightGrey}
+            selectionColor={theme.white}
+            style={{...styles.textStyle, ...styles.editInput}}
+            autoFocus={true}
+          />
+        ) : (
+          <Text style={styles.textStyle}>{message}</Text>
+        )}
+
       </Animated.View>
 
       <Animated.View // Right Button  1
@@ -189,7 +232,7 @@ export default function Item({
       <Animated.View // Right Button 2
         style={[styles.rightButtonContainer, {backgroundColor: theme.neutral}, getRightButtonProps()]}
       >
-        <TouchableOpacity onPress={() => editButtonPressed()}>
+        <TouchableOpacity onPress={() => editTodo()}>
           <AntDesign name="edit" size={20}/>
           <Text style={styles.textStyle}>Edit</Text>
         </TouchableOpacity>
@@ -219,7 +262,9 @@ const styles = StyleSheet.create({
   },
   textStyle: {
     color: theme.white,
+    fontSize: 16,
   },
+  editInput: {},
   rightButtonContainer: {
     position: 'absolute',
     left: SCREEN_WIDTH / 1.24,
