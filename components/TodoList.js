@@ -1,14 +1,13 @@
 import {StatusBar} from 'expo-status-bar';
 import {StyleSheet, Text, View, TouchableOpacity, TextInput} from 'react-native';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 import {theme} from '../theme';
-import {useRecoilState, useRecoilValue, useSetRecoilState} from 'recoil';
+import {useRecoilState} from 'recoil';
 import List from "./List";
-import {FilteredTodoListState, TodoListFilterState, TodoListState} from "../atom";
+import {TodoListFilterState, TodoListState} from "../atom";
 
 
 export default function TodoList() {
-  const filteredTodoList = useRecoilValue(FilteredTodoListState);
   const [todoList, setTodoList] = useRecoilState(TodoListState);
   const [categoryState, setCategoryState] = useRecoilState(TodoListFilterState);
   const [text, setText] = useState("");
@@ -29,30 +28,31 @@ export default function TodoList() {
 
 
   return (
-      <View style={styles.container}>
-        <StatusBar style="light"/>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={categoryToDo}>
-            <Text style={{...styles.btnText, color: categoryState ? theme.white : theme.grey}}>To Do</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={categoryDone}>
-            <Text style={{...styles.btnText, color: categoryState ? theme.grey : theme.white}}>Done</Text>
-          </TouchableOpacity>
-        </View>
-        {
-          categoryState && (
-            <TextInput
-              value={text}
-              onSubmitEditing={addToDo}
-              onChangeText={onChangeText}
-              returnKeyType={"done"}
-              placeholder={"What do you have to do?"}
-              style={styles.input}>
-            </TextInput>
-          )
-        }
-        <List />
+    <View style={styles.container}>
+      <StatusBar style="light"/>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={categoryToDo}>
+          <Text style={{...styles.btnText, color: categoryState ? theme.white : theme.grey}}>To Do</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={categoryDone}>
+          <Text style={{...styles.btnText, color: categoryState ? theme.grey : theme.white}}>Done</Text>
+        </TouchableOpacity>
       </View>
+      {
+        categoryState && (
+          <TextInput
+            value={text}
+            onSubmitEditing={addToDo}
+            onChangeText={onChangeText}
+            returnKeyType={"done"}
+            placeholder={"What do you have to do?"}
+            selectionColor={theme.black}
+            style={styles.input}
+          />
+        )
+      }
+      <List/>
+    </View>
   );
 }
 
@@ -90,9 +90,5 @@ const styles = StyleSheet.create({
     paddingVertical: theme.gapM,
     marginBottom: theme.gapS,
     borderRadius: 4,
-  },
-  toDoText: {
-    color: theme.white,
-    fontSize: 16,
   },
 });
