@@ -8,18 +8,26 @@ const DATA = {
   "three": {message: "Message #3", category: true},
 };
 
-const loadLocalTodoList = AsyncStorage.getItem(STORAGE_KEY);
-let parsedLocalTodoList;
-if (loadLocalTodoList !== null) {
-  console.log(loadLocalTodoList)
-  // parsedLocalTodoList = JSON.parse(loadLocalTodoList);
-} else {
-  parsedLocalTodoList = DATA
+const getLocalData = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem(STORAGE_KEY)
+    return jsonValue != null ? JSON.parse(jsonValue) : null;
+  } catch (e) {
+    console.log("load", e);
+  }
+}
+export const storeData = async (value) => {
+  try {
+    const jsonValue = JSON.stringify(value)
+    await AsyncStorage.setItem(STORAGE_KEY, jsonValue)
+  } catch (e) {
+    console.log("store", e);
+  }
 }
 
 export const TodoListState = atom({
   key: 'todoState',
-  default: DATA,
+  default: getLocalData(),
 })
 
 export const TodoListFilterState = atom({
@@ -32,16 +40,7 @@ export const FilteredTodoListState = selector({
   get: ({get}) => {
     const filter = get(TodoListFilterState);
     const list = get(TodoListState);
-    console.log(list);
     return Object.keys(list).filter(key => list[key].category === filter);
 
-  }
-})
-
-const SaveTodoState = selector({ //콘솔 찍어보기
-  key: 'saveTodoState',
-  get: async ({get}) => {
-    const todoList = get(TodoListState);
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(todoList));
   }
 })

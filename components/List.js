@@ -2,7 +2,7 @@ import {StyleSheet, ScrollView, LayoutAnimation, Platform, UIManager, View, Aler
 import Item from "./Item";
 import {useEffect, useState} from "react";
 import {useRecoilState, useRecoilValue} from "recoil";
-import {FilteredTodoListState, TodoListState} from "../atom";
+import {FilteredTodoListState, storeData, TodoListFilterState, TodoListState} from "../atom";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -10,13 +10,17 @@ if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental
 
 export default function List() {
   const filteredTodoList = useRecoilValue(FilteredTodoListState);
+  const categoryState = useRecoilValue(TodoListFilterState);
   const [todoList, setTodoList] = useRecoilState(TodoListState);
   const [swipingState, setSwiping] = useState(false);
 
   const DoneTodo = (key) => { //더 효율적인 방법 고민해보기
+    console.log("before",todoList);
+      
     const tempTodos = {...todoList};
-    tempTodos[key] = {message: tempTodos[key].message, category: !tempTodos[key].category};
+    tempTodos[key] = {message: tempTodos[key].message, category: !categoryState};
     setTodoList(tempTodos);
+    storeData(tempTodos);
     LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
   }
 
@@ -29,6 +33,7 @@ export default function List() {
           const tempTodos = {...todoList};
           delete tempTodos[key];
           setTodoList(tempTodos);
+          storeData(tempTodos);
           LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
         }
       }
@@ -45,7 +50,6 @@ export default function List() {
           id={key}
           checkedButtonPressed={() => DoneTodo(key)}
           deleteButtonPressed={() => deleteTodo(key)}
-          editButtonPressed={() => console.log('edit')}
         />
       );
     });
